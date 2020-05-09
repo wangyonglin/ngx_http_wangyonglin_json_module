@@ -1,0 +1,35 @@
+ngx_addon_name=ngx_http_wangyonglin_json_module
+
+HTTP_WANGYONGLIN_DEPS="	\
+	$ngx_addon_dir/wyl_json.h	\
+	$ngx_addon_dir/cJSON.h"
+
+HTTP_WANGYONGLIN_SRCS="	\
+	$ngx_addon_dir/cJSON.c	\
+	$ngx_addon_dir/wyl_json.c	\
+	$ngx_addon_dir/ngx_http_wangyonglin_json_module.c"
+	
+
+ngx_module_incs="	\
+    $ngx_addon_dir	\
+    $ngx_addon_dir/utils"
+
+CORE_LIBS="$CORE_LIBS -lstdc++ -lm"
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name=$ngx_addon_name
+    ngx_module_deps="$HTTP_WANGYONGLIN_DEPS"
+    ngx_module_srcs="$HTTP_WANGYONGLIN_SRCS"
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES $ngx_addon_name"
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $HTTP_WANGYONGLIN_DEPS"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $HTTP_WANGYONGLIN_SRCS"
+
+    CORE_INCS="$CORE_INCS $ngx_module_incs"
+fi
+
+have=T_NGX_WANGYONGLIN . auto/have
+

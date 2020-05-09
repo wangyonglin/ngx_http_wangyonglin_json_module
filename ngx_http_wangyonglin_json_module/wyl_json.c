@@ -9,32 +9,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+cJSON* ngx_wangyonglin_result(char * ip,int visited){
+	cJSON * root = cJSON_CreateObject();
+	cJSON_AddStringToObject(root, "ip", ip);
+	cJSON_AddNumberToObject(root,"visited",visited);
+	return root;
+}
+ngx_int_t ngx_wangyonglin_response(ngx_pool_t *pool,cJSON* in,u_char *out){
+	/**声明区**/
 
-ngx_int_t wyl_json_body(ngx_http_request_t *r,char ** out,int error,const char * reason,cJSON* result){
 	cJSON* root;
 	char *datetime; 
-
 	struct tm t;
 	struct timeval tv;
-
-    datetime = ngx_pcalloc(r->pool, sizeof(datetime));
+	char * build;
+	
+	/**内存区**/
+    datetime = ngx_pcalloc(pool, sizeof(datetime));
     if (datetime == NULL) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "datetime ngx_pcalloc return null");
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        return NGX_ERROR;
     }
 	
+	build = ngx_pcalloc(pool, sizeof(build));
+    if (build == NULL) {
+        return NGX_ERROR;
+    }
 	
+	/**主体区**/
 	gettimeofday(&tv, NULL);
 	localtime_r(&tv.tv_sec,&t);
 	sprintf(datetime,"%d-%d-%d %d:%d:%d.%03d",t.tm_year+1900,t.tm_mon+1,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec,(int)(tv.tv_usec/1000));	
 	
 	root = cJSON_CreateObject();
-	cJSON_AddNumberToObject(root, "error_code", error);
-	cJSON_AddStringToObject(root, "reason", reason);
-	if(result == NULL)	cJSON_AddItemToObject(root, "result", cJSON_CreateObject());
-	else	cJSON_AddItemToObject(root, "result", result);
+	cJSON_AddNumberToObject(root, "error_code", 200);
+	cJSON_AddStringToObject(root, "reason", "OK");
+	if(in == NULL)	cJSON_AddItemToObject(root, "result", cJSON_CreateObject());
+	else	cJSON_AddItemToObject(root, "result", in);
 	cJSON_AddStringToObject(root,"datetime",datetime);
-	*out=cJSON_Print(root);
-	cJSON_Delete(root);
-	return NGX_OK;
+	build=cJSON_Print(root);
+	cJSON_Delete(root);	
+	ngx_memcpy(out,build,ngx_strlen(build));
+	return strlen(build);
 }

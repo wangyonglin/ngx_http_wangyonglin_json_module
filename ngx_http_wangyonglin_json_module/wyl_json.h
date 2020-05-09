@@ -7,8 +7,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-	extern	ngx_int_t wyl_json_body(ngx_http_request_t *r,char ** out,int error,const char * reason,cJSON* result);
+	extern	cJSON* ngx_wangyonglin_result(char * ip,int visited);
+	extern	ngx_int_t ngx_wangyonglin_response(ngx_pool_t *pool,cJSON* in,u_char *out);
 	
 #ifdef __cplusplus
 }
